@@ -5,6 +5,14 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="color-scheme" content="dark">
 <title>MAHASI_ABC | Motorcycle Service & Care</title>
+<meta name="description" content="MAHASI_ABC — মোটরসাইকেল সার্ভিস, যন্ত্রাংশ ও কেয়ার। মানিকগঞ্জ ও কেরানীগঞ্জে বাইক কেনা-বেচা, সার্ভিস বুকিং ও WhatsApp-এ সরাসরি যোগাযোগ।">
+<meta name="theme-color" content="#0b0d10">
+<meta property="og:type" content="website">
+<meta property="og:title" content="MAHASI_ABC | Motorcycle Service &amp; Care">
+<meta property="og:description" content="MAHASI_ABC — মোটরসাইকেল সার্ভিস, যন্ত্রাংশ ও কেয়ার। মানিকগঞ্জ ও কেরানীগঞ্জে বাইক কেনা-বেচা, সার্ভিস বুকিং ও WhatsApp-এ সরাসরি যোগাযোগ।">
+<meta property="og:locale" content="bn_BD">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%8F%8D%EF%B8%8F%3C/text%3E%3C/svg%3E">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"AutoRepair","name":"MAHASI_ABC Motorcycle Service & Care","telephone":"+880190564642","areaServed":["মানিকগঞ্জ","কেরানীগঞ্জ"],"sameAs":["https://www.facebook.com/profile.php?id=61596257199191"]}</script>
 <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=Montserrat:wght@600;800;900&display=swap" rel="stylesheet">
 <style>
 :root{color-scheme:dark;--bg:#0b0d10;--panel:#14181e;--red:#e53935;--gold:#d8b36a;--white:#f7f7f5;--muted:#a9afb8;--line:rgba(255,255,255,.12);--green:#20b56b;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
@@ -49,7 +57,7 @@ h1 span{color:var(--red)}
 .hero-scene #heroBike{position:absolute;left:6%;width:52%;bottom:8%}
 .hero-scene .hero-bike{display:block;max-width:none;animation:rb .55s ease-in-out infinite alternate}
 @keyframes rb{from{transform:translateY(0)}to{transform:translateY(-2px)}}
-.road-dash{stroke-dasharray:14 22;animation:rd .8s linear infinite}@keyframes rd{to{stroke-dashoffset:-72}}}
+.road-dash{stroke-dasharray:14 22;animation:rd .8s linear infinite}@keyframes rd{to{stroke-dashoffset:-72}}
 .cloud{animation:cl 40s linear infinite}@keyframes cl{from{transform:translateX(-80px)}to{transform:translateX(680px)}}
 .spin{transform-box:fill-box;transform-origin:center;animation:spin 1.4s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}
 .speed{stroke:var(--gold);stroke-width:3;stroke-linecap:round;opacity:.5;animation:dash 1.2s linear infinite}
@@ -282,6 +290,7 @@ footer{padding:26px 0;color:#8f969f;text-align:center;font-size:14px}footer stro
 .bs-send{display:flex;gap:8px;padding:10px;border-top:1px solid var(--line)}
 .bs-send input{flex:1;background:#0f1319;border:1px solid var(--line);color:#fff;border-radius:8px;padding:9px}
 @media(max-width:860px){.bs-grid{grid-template-columns:1fr}.bs-form{grid-template-columns:1fr}.bs-card{grid-template-columns:90px 1fr}.bs-card .ph{width:90px}}
+:focus-visible{outline:2px solid var(--gold);outline-offset:3px}
 </style>
 </head>
 <body>
@@ -578,7 +587,7 @@ const icc=["#e53935","#d8b36a","#2f6fed","#20b56b"],ict=["naked","classic","spor
 const brands=[...new Set(bikes.map(b=>b[0]))];
 $("filters").innerHTML='<button class="filter active" data-b="all">সব ব্র্যান্ড</button>'+brands.map(b=>`<button class="filter" data-b="${b}">${b}</button>`).join("");
 $("brand").innerHTML+=brands.concat("অন্যান্য").map(b=>`<option>${b}</option>`).join("");
-$("grid").innerHTML=bikes.map((b,i)=>`<article class="bike-card" data-b="${b[0]}" data-q="${(b[0]+" "+b[1]).toLowerCase()}" style="--c:${b[3]}33;animation-delay:${i*70}ms"><div class="bike-photo">${svg(b[3],"",bt[i])}<img class="real" src="https://loremflickr.com/900/600/${encodeURIComponent(b[0]+" motorcycle")}?lock=${i+31}" alt="${b[0]} motorcycle representative photo" loading="lazy" referrerpolicy="no-referrer" onerror="this.remove()"></div><div class="bike-info"><div class="bike-brand">${b[0].toUpperCase()}</div><h3>${b[1]}</h3><p>${b[2]}</p><button class="btn primary book-bike" data-m="${b[0]} ${b[1]}">এই বাইকের সার্ভিস বুক করুন</button></div></article>`).join("");
+$("grid").innerHTML=bikes.map((b,i)=>`<article class="bike-card" data-b="${b[0]}" data-q="${(b[0]+" "+b[1]).toLowerCase()}" style="--c:${b[3]}33;animation-delay:${i*70}ms"><div class="bike-photo">${svg(b[3],"",bt[i])}<img class="real" src="bike-images/${bikeImg[i]}.jpg" alt="${b[0]} ${b[1]}" loading="lazy" onerror="if(!this.dataset.t){this.dataset.t=1;this.src=this.src.replace(/\.jpg$/,'.png')}else{this.remove()}"></div><div class="bike-info"><div class="bike-brand">${b[0].toUpperCase()}</div><h3>${b[1]}</h3><p>${b[2]}</p><button class="btn primary book-bike" data-m="${b[0]} ${b[1]}">এই বাইকের সার্ভিস বুক করুন</button></div></article>`).join("");
 $("chips").innerHTML=services.concat("অন্যান্য").map(s=>`<button type="button" class="chip">${s}</button>`).join("");
 $("chips").onclick=e=>e.target.classList.contains("chip")&&e.target.classList.toggle("on");
 // filter + search
@@ -766,9 +775,13 @@ const g=i=>document.getElementById(i);
 const esc=t=>String(t==null?"":t).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const LS={get(k,d){try{const v=localStorage.getItem(k);return v?JSON.parse(v):d}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v));return true}catch(e){return false}}};
 const bn=n=>String(n).replace(/\d/g,d=>"০১২৩৪৫৬৭৮৯"[d]);
-let dist=null,tab="buy",ads=LS.get("mbs_ads",[]);
+const SB="https://wfofgskhwuvaqmlnmvwe.supabase.co",KEY="sb_publishable_-j1csrsXlNbxouR0iFbOaA_iYN5ULXv",H={apikey:KEY};
+async function api(p,o={}){const r=await fetch(SB+"/rest/v1/"+p,{...o,headers:{...H,"Content-Type":"application/json",...(o.headers||{})}});if(!r.ok)throw new Error(await r.text());return r.status===204?null:r.json()}
+let dist=null,tab="buy",ads=[],loaded=false;
+const IMG=SB+"/storage/v1/object/public/ad-images/";
+async function loadAds(){try{const r=await api("ads?select=*&order=created_at.desc&limit=100");ads=r.map(a=>({id:a.id,t:Date.parse(a.created_at),d:a.district,title:a.title,brand:a.brand,price:a.price,year:a.year,cc:a.cc,cond:a.cond,area:a.area,note:a.note,phone:a.phone,img:a.image_url&&a.image_url.startsWith(IMG)?a.image_url.replace(/['"()\\\s]/g,""):""}))}catch(e){}loaded=true}
 const me=()=>LS.get("mbs_me","");
-function pick(d){dist=d;tab="buy";["dM","zM"].forEach(i=>g(i).classList.toggle("on",d==="m"));["dK","zK"].forEach(i=>g(i).classList.toggle("on",d==="k"));draw()}
+function pick(d){dist=d;tab="buy";["dM","zM"].forEach(i=>g(i).classList.toggle("on",d==="m"));["dK","zK"].forEach(i=>g(i).classList.toggle("on",d==="k"));draw();loadAds().then(()=>{if(dist===d&&tab==="buy")drawBuy()})}
 [["dM","m"],["zM","m"],["dK","k"],["zK","k"]].forEach(([i,d])=>{const e=g(i);e.addEventListener("click",()=>{pick(d);g("bsPanel").scrollIntoView({behavior:"smooth",block:"nearest"})});e.addEventListener("keydown",ev=>{if(ev.key==="Enter"||ev.key===" "){ev.preventDefault();pick(d)}})});
 function draw(){
 const p=g("bsPanel"),D1=D[dist];
@@ -779,8 +792,8 @@ tab==="buy"?drawBuy():drawSell();
 }
 function drawBuy(){
 const list=ads.filter(a=>a.d===dist).sort((a,b)=>b.t-a.t),b=g("bsBody");
-if(!list.length){b.innerHTML=`<div class="bs-empty">এই এলাকায় এখনো কোনো বিজ্ঞাপন নেই।<br>প্রথম বিজ্ঞাপনটি আপনিই দিন!</div>`;return}
-b.innerHTML=`<div class="bs-list">`+list.map(a=>`<div class="bs-card"><div class="ph" style="${a.img?`background-image:url('${a.img}')`:""}">${a.img?"":"🏍️"}</div><div>
+if(!list.length){b.innerHTML=!loaded?`<div class="bs-empty">লোড হচ্ছে…</div>`:`<div class="bs-empty">এই এলাকায় এখনো কোনো বিজ্ঞাপন নেই।<br>প্রথম বিজ্ঞাপনটি আপনিই দিন!</div>`;return}
+b.innerHTML=`<div class="bs-list">`+list.map(a=>`<div class="bs-card"><div class="ph" role="img" aria-label="বাইকের ছবি" style="${a.img?`background-image:url('${a.img}')`:""}">${a.img?"":"🏍️"}</div><div>
 <h5>${esc(a.title)}</h5><div class="bs-price">৳ ${bn(Number(a.price).toLocaleString("en-IN"))}</div>
 <div class="bs-meta">${esc(a.brand)} · ${bn(esc(a.year))} · ${bn(esc(a.cc))} cc · ${esc(a.cond)}<br>📍 ${esc(a.area)}${a.note?`<br>${esc(a.note)}`:""}</div>
 <div class="bs-btns"><button class="c" type="button" data-chat="${a.id}">💬 চ্যাট</button><a class="w" target="_blank" rel="noopener" href="https://wa.me/88${esc(a.phone)}?text=${encodeURIComponent("আসসালামু আলাইকুম, MAHASI_ABC সাইটে আপনার বাইক বিজ্ঞাপন দেখলাম: "+a.title)}">WhatsApp</a><a href="tel:${esc(a.phone)}">📞 কল</a>${a.mine?`<button class="d" type="button" data-del="${a.id}">মুছুন</button>`:""}</div></div></div>`).join("")+`</div>`;
@@ -806,23 +819,25 @@ g("bsForm").onsubmit=async e=>{
 e.preventDefault();const f=new FormData(e.target),o=Object.fromEntries(f.entries());
 for(const k of ["title","brand","price","year","cc","area","name","phone"])if(!String(o[k]||"").trim()){alert("সব * চিহ্নিত ঘর পূরণ করুন");return}
 if(!/^01[0-9]{9}$/.test(o.phone)){alert("সঠিক মোবাইল নম্বর দিন (01XXXXXXXXX)");return}
-let img="";const fl=g("bsImg").files[0];if(fl)img=await shrink(fl);
-const ad={id:"a"+Date.now(),t:Date.now(),d:dist,mine:true,img,...o};
-ads.push(ad);LS.set("mbs_me",o.name);
-if(!LS.set("mbs_ads",ads)){ad.img="";LS.set("mbs_ads",ads)}
-tab="buy";draw();
+const sbtn=e.target.querySelector("button[type=submit]");sbtn.disabled=true;sbtn.textContent="জমা হচ্ছে…";
+try{let img=null;const fl=g("bsImg").files[0];
+if(fl){const du=await shrink(fl);if(du){const bl=await(await fetch(du)).blob(),nm=Date.now()+"-"+Math.random().toString(36).slice(2,8)+".jpg";const ur=await fetch(SB+"/storage/v1/object/ad-images/"+nm,{method:"POST",headers:{...H,"Content-Type":"image/jpeg"},body:bl});if(ur.ok)img=IMG+nm}}
+await api("ads",{method:"POST",headers:{Prefer:"return=minimal"},body:JSON.stringify({district:dist,title:o.title.trim(),brand:o.brand.trim(),price:Number(o.price),year:Number(o.year),cc:Number(o.cc),cond:o.cond,area:o.area.trim(),note:(o.note||"").trim()||null,seller_name:o.name.trim(),phone:o.phone,image_url:img})});
+LS.set("mbs_me",o.name);alert("ধন্যবাদ! বিজ্ঞাপন জমা হয়েছে। অনুমোদনের পর সাইটে দেখা যাবে।");tab="buy";draw();loadAds().then(()=>{if(tab==="buy")drawBuy()})
+}catch(err){alert("বিজ্ঞাপন জমা হয়নি। ইন্টারনেট দেখে আবার চেষ্টা করুন।");sbtn.disabled=false;sbtn.textContent="বিজ্ঞাপন প্রকাশ করুন"}
 };
 }
 function shrink(file){return new Promise(res=>{const r=new FileReader();r.onload=()=>{const im=new Image();im.onload=()=>{const s=Math.min(1,520/im.width),c=document.createElement("canvas");c.width=im.width*s;c.height=im.height*s;c.getContext("2d").drawImage(im,0,0,c.width,c.height);res(c.toDataURL("image/jpeg",.7))};im.onerror=()=>res("");im.src=r.result};r.onerror=()=>res("");r.readAsDataURL(file)})}
 /* chat */
 let cur=null;
-function msgs(){return LS.get("mbs_chat_"+cur.id,[])}
-function showMsgs(){const m=g("bsMsgs"),a=msgs();m.innerHTML=a.length?a.map(x=>`<div class="bs-msg ${x.me?"me":""}"><small>${esc(x.n)}</small>${esc(x.m)}</div>`).join(""):`<div class="bs-empty">বিক্রেতাকে প্রথম মেসেজ পাঠান 👋</div>`;m.scrollTop=m.scrollHeight}
-function openChat(id){cur=ads.find(a=>a.id===id);if(!cur)return;let n=me();if(!n){n=prompt("আপনার নাম লিখুন")||"ক্রেতা";LS.set("mbs_me",n)}g("bsChatT").textContent="💬 "+cur.title;g("bsChat").classList.add("on");showMsgs()}
-function send(){const i=g("bsChatIn"),t=i.value.trim();if(!t||!cur)return;const a=msgs();a.push({n:me()||"আমি",m:t,me:true,t:Date.now()});LS.set("mbs_chat_"+cur.id,a);i.value="";showMsgs()}
+let cm=[],poll=null;function msgs(){return cm}
+async function loadMsgs(){if(!cur)return;const id=cur.id;try{const r=await api("messages?select=sender,body&ad_id=eq."+encodeURIComponent(id)+"&order=created_at.asc&limit=200");if(cur&&cur.id===id){cm=r;showMsgs()}}catch(e){}}
+function showMsgs(){const m=g("bsMsgs"),a=msgs();m.innerHTML=a.length?a.map(x=>`<div class="bs-msg ${x.sender===me()?"me":""}"><small>${esc(x.sender)}</small>${esc(x.body)}</div>`).join(""):`<div class="bs-empty">বিক্রেতাকে প্রথম মেসেজ পাঠান 👋<br><small>⚠️ চ্যাট সবাই দেখতে পারে, ফোন নম্বর লিখবেন না।</small></div>`;m.scrollTop=m.scrollHeight}
+function openChat(id){cur=ads.find(a=>a.id===id);if(!cur)return;let n=me();if(!n){n=prompt("আপনার নাম লিখুন")||"ক্রেতা";LS.set("mbs_me",n)}g("bsChatT").textContent="💬 "+cur.title;g("bsChat").classList.add("on");cm=[];showMsgs();loadMsgs();clearInterval(poll);poll=setInterval(loadMsgs,5000)}
+function send(){const i=g("bsChatIn"),t=i.value.trim();if(!t||!cur)return;i.value="";api("messages",{method:"POST",headers:{Prefer:"return=minimal"},body:JSON.stringify({ad_id:cur.id,sender:(me()||"আমি").slice(0,30),body:t.slice(0,500)})}).then(loadMsgs).catch(()=>alert("মেসেজ যায়নি"))}
 g("bsChatGo").onclick=send;g("bsChatIn").addEventListener("keydown",e=>{if(e.key==="Enter")send()});
-g("bsChatX").onclick=()=>g("bsChat").classList.remove("on");
-g("bsChat").addEventListener("click",e=>{if(e.target.id==="bsChat")g("bsChat").classList.remove("on")});
+g("bsChatX").onclick=()=>{g("bsChat").classList.remove("on");clearInterval(poll)};
+g("bsChat").addEventListener("click",e=>{if(e.target.id==="bsChat"){g("bsChat").classList.remove("on");clearInterval(poll)}});
 })();
 </script>
 </body>

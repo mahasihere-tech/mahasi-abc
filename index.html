@@ -819,12 +819,15 @@ g("bsForm").onsubmit=async e=>{
 e.preventDefault();const f=new FormData(e.target),o=Object.fromEntries(f.entries());
 for(const k of ["title","brand","price","year","cc","area","name","phone"])if(!String(o[k]||"").trim()){alert("সব * চিহ্নিত ঘর পূরণ করুন");return}
 if(!/^01[0-9]{9}$/.test(o.phone)){alert("সঠিক মোবাইল নম্বর দিন (01XXXXXXXXX)");return}
+if(+o.year<1990||+o.year>2027){alert("মডেল সাল ১৯৯০ থেকে ২০২৭-এর মধ্যে দিন");return}
+if(+o.cc<50||+o.cc>1500){alert("সিসি ৫০ থেকে ১৫০০-এর মধ্যে দিন");return}
+if(+o.price<=0){alert("সঠিক দাম দিন");return}
 const sbtn=e.target.querySelector("button[type=submit]");sbtn.disabled=true;sbtn.textContent="জমা হচ্ছে…";
 try{let img=null;const fl=g("bsImg").files[0];
 if(fl){const du=await shrink(fl);if(du){const bl=await(await fetch(du)).blob(),nm=Date.now()+"-"+Math.random().toString(36).slice(2,8)+".jpg";const ur=await fetch(SB+"/storage/v1/object/ad-images/"+nm,{method:"POST",headers:{...H,"Content-Type":"image/jpeg"},body:bl});if(ur.ok)img=IMG+nm}}
 await api("ads",{method:"POST",headers:{Prefer:"return=minimal"},body:JSON.stringify({district:dist,title:o.title.trim(),brand:o.brand.trim(),price:Number(o.price),year:Number(o.year),cc:Number(o.cc),cond:o.cond,area:o.area.trim(),note:(o.note||"").trim()||null,seller_name:o.name.trim(),phone:o.phone,image_url:img})});
 LS.set("mbs_me",o.name);alert("ধন্যবাদ! বিজ্ঞাপন জমা হয়েছে। অনুমোদনের পর সাইটে দেখা যাবে।");tab="buy";draw();loadAds().then(()=>{if(tab==="buy")drawBuy()})
-}catch(err){alert("বিজ্ঞাপন জমা হয়নি। ইন্টারনেট দেখে আবার চেষ্টা করুন।");sbtn.disabled=false;sbtn.textContent="বিজ্ঞাপন প্রকাশ করুন"}
+}catch(err){console.error(err);alert("বিজ্ঞাপন জমা হয়নি। ইন্টারনেট দেখে আবার চেষ্টা করুন।\n("+String(err.message).slice(0,160)+")");sbtn.disabled=false;sbtn.textContent="বিজ্ঞাপন প্রকাশ করুন"}
 };
 }
 function shrink(file){return new Promise(res=>{const r=new FileReader();r.onload=()=>{const im=new Image();im.onload=()=>{const s=Math.min(1,520/im.width),c=document.createElement("canvas");c.width=im.width*s;c.height=im.height*s;c.getContext("2d").drawImage(im,0,0,c.width,c.height);res(c.toDataURL("image/jpeg",.7))};im.onerror=()=>res("");im.src=r.result};r.onerror=()=>res("");r.readAsDataURL(file)})}

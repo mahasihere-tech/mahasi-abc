@@ -8345,6 +8345,7 @@ html:not(.cg-on) #cg-pf.open{display:flex}
 #mh-card button{border:0;border-radius:8px;padding:8px 11px;background:#E53935;color:#fff;font:700 12px inherit;font-family:inherit;cursor:pointer}
 #mh-card button.g{background:#1B212B;border:1px solid rgba(255,255,255,.18)}
 #mh-card .c{position:absolute;right:8px;top:4px;background:none;padding:2px 6px;color:#9CA3AF;font-size:18px}
+.shop-lift{cursor:pointer;pointer-events:auto;transition:filter .2s}.shop-lift:hover{filter:drop-shadow(0 0 10px rgba(255,38,56,.8))}
 #mh-who{position:fixed;right:14px;bottom:14px;z-index:9989;border:1px solid rgba(255,255,255,.2);border-radius:999px;padding:9px 14px;background:#111827ee;color:#fff;font:700 12px "Hind Siliguri",system-ui,sans-serif;cursor:pointer}
 </style>
 <div id="mh-bp" role="dialog" aria-modal="true" aria-label="আপনার বাইক সিলেক্ট করুন"><div class="bx"></div></div>
@@ -8378,7 +8379,7 @@ html:not(.cg-on) #cg-pf.open{display:flex}
   }
   function startFlow(){if(me())picker();else{signup();watch()}}
   function save(b){
-    var m=me();if(!m)return;var d=rd(DB,{});d[uid(m)]=b;wr(DB,d);
+    var m=me();if(!m)return;var d=rd(DB,{});d[uid(m)]=b;wr(DB,d);try{sessionStorage.removeItem('mh_welcomed')}catch(e){}
     bp.classList.remove('open');paint();
     bx.innerHTML='';card.innerHTML='<b>✓ বাইক সেভ হয়েছে</b>পুরো সাইট আপনার '+esc(label(b))+' অনুযায়ী সাজানো হচ্ছে…';card.classList.add('open');
     var sp=window.mhAuthSaveBike?window.mhAuthSaveBike(b):null;Promise.race([Promise.resolve(sp),new Promise(function(r){setTimeout(r,3000)})]).then(function(){setTimeout(function(){location.reload()},600)});
@@ -8416,27 +8417,264 @@ html:not(.cg-on) #cg-pf.open{display:flex}
     var br=b.getAttribute('data-b'),m=b.getAttribute('data-m');if(br&&m)save({id:neId(br,m),brand:br,model:m});
   });
   var allow=0;
-  document.addEventListener('click',function(e){var c=e.target.closest&&e.target.closest('.rk-scene .cg-start');if(c&&!allow){e.preventDefault();e.stopImmediatePropagation();startFlow()}},true);
+  function bikeClick(){if(!me()){signup();watch()}else if(mine())show(true);else picker()}
+  window.mhBikeClick=bikeClick;window.mhMine=mine;
+  document.addEventListener('click',function(e){var c=e.target.closest&&e.target.closest('.shop-lift');if(c){e.preventDefault();bikeClick()}});
   function playGame(){var g=document.querySelector('.rk-scene .cg-start');if(!g)return;bp.classList.remove('open');allow=1;g.click();allow=0}
   function place(){var bt=document.querySelector('#home button');if(bt&&bt.parentNode&&who.parentNode!==bt.parentNode){bt.parentNode.insertBefore(who,bt.nextSibling);who.classList.add('in')}}
   place();var pt=0;new MutationObserver(function(){if(pt)return;pt=setTimeout(function(){pt=0;place()},250)}).observe(document.body,{childList:true,subtree:true});
   who.addEventListener('click',function(){if(me())picker();else{signup();watch()}});
-  function show(){
-    var m=me(),b=mine();if(!m||!b||sessionStorage.getItem('mh_welcomed'))return;
+  function show(f){
+    var m=me(),b=mine();if(!m||!b||(!f&&sessionStorage.getItem('mh_welcomed')))return;
     try{sessionStorage.setItem('mh_welcomed','1')}catch(e){}
-    card.innerHTML='<button class="c" aria-label="বন্ধ করুন">×</button><b>স্বাগতম, '+esc((m.name||'').split(' ')[0])+'!</b>আপনার '+esc(label(b))+' কি এখন সার্ভিস করবেন?<div class="r"><button data-a="s">সার্ভিস বুক করুন</button><button class="g" data-a="k">স্টিকার সাজান</button><button class="g" data-a="c">বাইক বদলান</button></div>';
+    card.innerHTML='<button class="c" aria-label="বন্ধ করুন">×</button><b>স্বাগতম, '+esc((m.name||'').split(' ')[0])+'!</b>আপনার '+esc(label(b))+' — এখন কী করাতে চান?<div class="r"><button data-a="s">🔧 সার্ভিস করান</button><button data-a="w">🚿 ওয়াশ করান</button><button data-a="k">🎨 স্টিকার করান</button><button class="g" data-a="c">বাইক বদলান</button></div>';
     card.classList.add('open');
   }
+  function go(a){
+    card.classList.remove('open');
+    if(a==='s'){var bt=document.querySelector('#home button');if(bt)bt.click()}
+    else if(a==='w'){var w=document.getElementById('bikewash');if(w)w.scrollIntoView({behavior:'smooth',block:'start'})}
+    else if(a==='k'){var el=document.getElementById('stickers')||document.getElementById('store');if(el)el.scrollIntoView({behavior:'smooth',block:'start'})}
+    else if(a==='c')picker();
+  }
+  window.mhGo=go;
   card.addEventListener('click',function(e){
-    var a=e.target.getAttribute&&e.target.getAttribute('data-a');
     if(e.target.classList.contains('c')){card.classList.remove('open');return}
-    if(a==='s'){card.classList.remove('open');var bt=document.querySelector('#home button');if(bt)bt.click()}
-    else if(a==='k'){card.classList.remove('open');var el=document.getElementById('stickers')||document.getElementById('store');if(el)el.scrollIntoView({behavior:'smooth'})}
-    else if(a==='c'){card.classList.remove('open');picker()}
+    var t=e.target.closest&&e.target.closest('[data-a]');if(t)go(t.getAttribute('data-a'));
   });
   paint();setTimeout(show,1800);
 })();
 </script>
+
+<style id="mh-sb-css">
+#mh-card{left:50%;top:50%;bottom:auto;transform:translate(-50%,-50%);width:min(400px,calc(100vw - 28px));padding:20px 18px;border-radius:18px;text-align:center;font-size:14px;z-index:99997;box-shadow:0 0 0 100vmax rgba(3,3,4,.72),0 20px 60px rgba(0,0,0,.6)}
+#mh-card b{font-size:18px;margin-bottom:6px}
+#mh-card .r{justify-content:center;gap:8px}
+#mh-card .r button{flex:1 1 42%;padding:12px 10px;font-size:13px}
+#mh-sb{position:relative;overflow:hidden;border-bottom:1px solid rgba(255,255,255,.06);background:radial-gradient(1100px 360px at 50% 0%,rgba(229,57,53,.10),transparent 70%),#0B0D10;padding:46px 0 0;color:#F4F4F2;font-family:"Hind Siliguri","Noto Sans Bengali",system-ui,sans-serif}
+#mh-sb *{box-sizing:border-box}
+.sb-wrap{max-width:1440px;margin:0 auto;padding:0 24px}
+.sb-head{text-align:center;max-width:780px;margin:0 auto}
+.sb-eyebrow{display:inline-block;font-size:12px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;color:#D8B36A}
+.sb-head h3{margin:8px 0 6px;font-size:clamp(24px,4vw,38px);font-weight:700;line-height:1.25}
+.sb-head h3 em{font-style:normal;background:linear-gradient(90deg,#E53935,#D8B36A,#E53935);background-size:200% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:sbShine 4s linear infinite}
+.sb-head p{margin:0;color:#9CA3AF;font-size:14px}
+.sb-grid{display:grid;grid-template-columns:1fr minmax(320px,640px) 1fr;gap:18px;align-items:center;margin-top:16px}
+.sb-col{display:grid;gap:12px}
+.sb-c{display:flex;align-items:center;gap:12px;text-align:left;padding:12px 14px;border-radius:14px;border:1px solid rgba(255,255,255,.09);background:linear-gradient(160deg,rgba(20,24,31,.95),rgba(14,17,22,.95));color:#F4F4F2;font:inherit;animation:sbIn .7s both;animation-delay:var(--d,0s)}
+.sb-c i{font-style:normal;display:grid;place-items:center;flex:none;width:40px;height:40px;border-radius:12px;background:rgba(216,179,106,.12);font-size:20px}
+.sb-c b{display:block;font-size:14px;color:#fff}
+.sb-c span{display:block;margin-top:2px;font-size:12px;line-height:1.45;color:#9CA3AF}
+.sb-c.act{cursor:pointer;transition:border-color .2s,transform .2s,box-shadow .2s}
+.sb-c.act:hover{border-color:#E53935;transform:translateY(-2px);box-shadow:0 8px 24px rgba(229,57,53,.22)}
+.sb-col.l .sb-c{flex-direction:row-reverse;text-align:right}
+.sb-stage{position:relative;display:block;width:100%;aspect-ratio:16/10;padding:0;border:0;background:none;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.sb-spot{position:absolute;left:18%;right:18%;top:-6%;bottom:14%;background:conic-gradient(from 180deg at 50% 0,transparent 160deg,rgba(255,244,214,.10) 180deg,transparent 200deg);clip-path:polygon(50% 0,100% 100%,0 100%);opacity:.9;pointer-events:none}
+.sb-ring{position:absolute;left:10%;right:10%;bottom:7%;height:26%;border-radius:50%;border:2px solid rgba(216,179,106,.55);background:radial-gradient(ellipse at center,rgba(229,57,53,.22),rgba(17,21,28,.6) 70%);box-shadow:0 0 36px rgba(216,179,106,.22),inset 0 0 30px rgba(229,57,53,.18);animation:sbPulse 3.2s ease-in-out infinite}
+.sb-stage canvas{position:absolute;inset:0;width:100%;height:100%;opacity:0;transition:opacity .7s}
+.sb-stage .fb{position:absolute;left:12%;right:12%;top:12%;bottom:12%;width:76%;height:76%;opacity:1;transition:opacity .5s;animation:sbFloat 4s ease-in-out infinite}
+#mh-sb.ready3d .sb-stage canvas{opacity:1}
+#mh-sb.ready3d .sb-stage .fb{opacity:0}
+.sb-tap{position:absolute;left:50%;top:4%;transform:translateX(-50%);white-space:nowrap;padding:8px 16px;border-radius:999px;border:1px solid rgba(216,179,106,.7);background:rgba(11,13,16,.88);color:#D8B36A;font-size:13px;font-weight:700;animation:sbBob 1.8s ease-in-out infinite;pointer-events:none}
+.sb-tap::after{content:"👆";display:block;text-align:center;margin-top:2px;font-size:18px;animation:sbPoke 1.2s ease-in-out infinite}
+.sb-rip{position:absolute;left:50%;top:52%;width:90px;height:90px;margin:-45px 0 0 -45px;border-radius:50%;border:2px solid rgba(229,57,53,.8);opacity:0;animation:sbRip 2.6s ease-out infinite;pointer-events:none}
+.sb-rip.b{animation-delay:1.3s}
+.sb-name{position:absolute;left:50%;bottom:1%;transform:translateX(-50%);white-space:nowrap;padding:6px 14px;border-radius:999px;background:rgba(229,57,53,.92);color:#fff;font-size:13px;font-weight:700;pointer-events:none}
+#mh-sb.sel .sb-tap{top:2%;border-color:rgba(24,200,110,.7);color:#7FE7B1}
+#mh-sb.sel .sb-tap::after{content:"✓"}
+#mh-sb.sel .sb-rip{display:none}
+.sb-road{height:36px;margin-top:8px;background:repeating-linear-gradient(90deg,#D8B36A 0 28px,transparent 28px 64px) center/auto 3px no-repeat,linear-gradient(#10141b,#0b0d10)}
+@keyframes sbShine{to{background-position:200% 0}}
+@keyframes sbIn{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+@keyframes sbPulse{50%{transform:scale(1.04);box-shadow:0 0 52px rgba(216,179,106,.35),inset 0 0 36px rgba(229,57,53,.28)}}
+@keyframes sbBob{50%{transform:translate(-50%,-6px)}}
+@keyframes sbPoke{50%{transform:translateY(5px)}}
+@keyframes sbFloat{50%{transform:translateY(-6px)}}
+@keyframes sbRip{0%{transform:scale(.4);opacity:.9}100%{transform:scale(2.6);opacity:0}}
+@media (max-width:900px){.sb-grid{grid-template-columns:1fr}.sb-stage{order:-1}.sb-col{grid-template-columns:1fr 1fr}.sb-col.l .sb-c{flex-direction:row;text-align:left}}
+@media (max-width:520px){.sb-col{grid-template-columns:1fr}.sb-wrap{padding:0 14px}}
+@media (prefers-reduced-motion:reduce){#mh-sb *{animation:none!important}}
+</style>
+
+<script id="mh-sb-js">
+/* শোরুমের নিচে 3D বাইক — ক্লিক করলে বাইক সিলেক্ট, তারপর সার্ভিস/ওয়াশ/স্টিকার পপ-আপ */
+(function(){
+  'use strict';
+  var URL3='https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js';
+  var root=null,stage,cv,colL,colR,head,badge,R=null,loading=0,failed=0,vis=0,raf=0,key='~',still=false;
+  try{still=window.matchMedia('(prefers-reduced-motion: reduce)').matches}catch(e){}
+  function esc(x){return String(x==null?'':x).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
+  function mine(){try{return window.mhMine?window.mhMine():null}catch(e){return null}}
+  function info(b){
+    var S=window.__MH_SJBR||[],i,cat='';
+    for(i=0;i<S.length;i++)if(S[i].n===b.brand){
+      (S[i].m||[]).forEach(function(m){if(m[0]===b.model)cat=m[1]});
+      return{c:S[i].c1||'#E53935',bn:S[i].bn||b.brand,d:S[i].d||'',cat:cat};
+    }
+    return{c:'#E53935',bn:b.brand||'',d:'',cat:''};
+  }
+  function card(ic,t,s,d,go){
+    return '<'+(go?'button type="button" data-go="'+go+'"':'div')+' class="sb-c'+(go?' act':'')+'" style="--d:'+d+'s"><i>'+ic+'</i><div><b>'+t+'</b><span>'+s+'</span></div></'+(go?'button':'div')+'>';
+  }
+  var FB='<svg class="fb" viewBox="300 270 180 120" aria-hidden="true"><g class="fbg"><circle cx="342" cy="322" r="21" stroke="#11151C" stroke-width="8" fill="none"/><circle cx="342" cy="322" r="13" stroke="#9CA3AF" stroke-width="2.5" fill="none"/><circle cx="430" cy="322" r="21" stroke="#11151C" stroke-width="8" fill="none"/><circle cx="430" cy="322" r="13" stroke="#9CA3AF" stroke-width="2.5" fill="none"/><path class="fbc" d="M335 304 L368 294 L396 286 L432 292 L442 308 L415 322 L372 322 Z" fill="#E53935" stroke="#F8FAFC" stroke-width="1.5"/><path d="M362 292 L392 287 L398 298 L368 300 Z" fill="#1F2937"/><polygon points="434,295 456,289 452,300" fill="#FEF08A"/></g></svg>';
+  function build(){
+    root=document.createElement('section');root.id='mh-sb';root.setAttribute('aria-label','আপনার বাইক সিলেক্ট করুন');
+    root.innerHTML='<div class="sb-wrap"><div class="sb-head"><span class="sb-eyebrow">YOUR BIKE · MAHASI_ABC GARAGE</span><h3></h3><p></p></div><div class="sb-grid"><div class="sb-col l"></div><button type="button" class="sb-stage" aria-label="আপনার বাইক সিলেক্ট করুন"><div class="sb-spot"></div><div class="sb-ring"></div>'+FB+'<canvas width="1120" height="700"></canvas><span class="sb-rip"></span><span class="sb-rip b"></span><span class="sb-tap"></span><span class="sb-name" hidden></span></button><div class="sb-col r"></div></div></div><div class="sb-road"></div>';
+    head=root.querySelector('.sb-head');stage=root.querySelector('.sb-stage');cv=root.querySelector('canvas');
+    colL=root.querySelector('.sb-col.l');colR=root.querySelector('.sb-col.r');badge=root.querySelector('.sb-name');
+    stage.addEventListener('click',function(){if(window.mhBikeClick)window.mhBikeClick()});
+    root.addEventListener('click',function(e){var t=e.target.closest&&e.target.closest('[data-go]');if(t&&window.mhGo)window.mhGo(t.getAttribute('data-go'))});
+    if('IntersectionObserver' in window){
+      new IntersectionObserver(function(es){vis=es[0].isIntersecting;if(vis){load();loop0()}else{cancelAnimationFrame(raf);raf=0}},{rootMargin:'200px'}).observe(root);
+    }else{vis=1;load();loop0()}
+  }
+  function paint(){
+    if(!root)return;
+    var b=mine(),k=b?(b.brand+'|'+b.model):'';
+    if(k===key)return;key=k;
+    var h3=head.querySelector('h3'),p=head.querySelector('p'),tap=root.querySelector('.sb-tap');
+    if(b){
+      var f=info(b),nm=((b.brand?b.brand+' ':'')+b.model);
+      root.classList.add('sel');
+      h3.innerHTML='আপনার বাইক: <em>'+esc(nm)+'</em>';
+      p.textContent='বাইকটা এখানেই থাকবে — নিচের অপশন থেকে সরাসরি সার্ভিস, ওয়াশ বা স্টিকারে যান। বাইক বদলাতে বাইকে ক্লিক করুন।';
+      tap.textContent='আপনার বাইক সেভ আছে';badge.hidden=false;badge.textContent=nm;
+      colL.innerHTML=card('🏍️',esc(nm),esc(f.bn)+(f.cat?' · '+esc(f.cat):''),.05)+(f.d?card('🏷️','ব্র্যান্ড',esc(f.d),.15):'')+card('🔄','বাইক বদলাতে চান?','বাইকটাতে ক্লিক করুন',.25);
+      colR.innerHTML=card('🔧','সার্ভিস করান','জেনারেল সার্ভিসিং ও টিউনিং বুক করুন',.1,'s')+card('🚿','ওয়াশ করান','সাধারণ, ফোম বা ফুল ডিটেইলিং ওয়াশ',.2,'w')+card('🎨','স্টিকার করান','আপনার বাইকের মাপে স্টিকার ডিজাইন',.3,'k');
+      if(R)R.tint(f.c);setFb(f.c);
+    }else{
+      root.classList.remove('sel');
+      h3.innerHTML='এই বাইকটাতে ক্লিক করুন — <em>আপনার বাইক সিলেক্ট করুন</em>';
+      p.textContent='বাংলাদেশের সব জনপ্রিয় বাইকের তালিকা থেকে আপনারটা বেছে নিন। সাইট মনে রাখবে আপনি কোন বাইক চালান।';
+      tap.textContent='এই বাইকটায় ক্লিক করুন';badge.hidden=true;
+      colL.innerHTML=card('🔧','জেনারেল সার্ভিসিং','চেসিস, চেইন, ক্লাচ ও ফিল্টার ক্লিনিং এবং টিউনিং',.05)+card('🛢️','ইঞ্জিন অয়েল','সঠিক গ্রেডের অয়েল ও অয়েল ফিল্টার চেক',.15)+card('🏠','হোম সার্ভিস','বাসা বা অফিসের দোরগোড়ায় সার্ভিস',.25);
+      colR.innerHTML=card('🚿','বাইক ওয়াশ','সাধারণ, ফোম ও ফুল ডিটেইলিং ওয়াশ',.1)+card('🎨','স্টিকার','আপনার বাইকের জন্য কাস্টম স্টিকার',.2)+card('📍','সহজ বুকিং','বাইক সিলেক্ট করে সরাসরি বুক করুন',.3);
+      if(R)R.tint('#E53935');setFb('#E53935');
+    }
+  }
+  function setFb(c){var p=root.querySelector('.fbc');if(p)p.setAttribute('fill',c)}
+  function load(){
+    if(R||loading||failed)return;loading=1;
+    var t=setTimeout(function(){if(!R){failed=1}},12000);
+    try{
+      var imp=new Function('u','return import(u)');
+      imp(URL3).then(function(T){
+        clearTimeout(t);
+        try{R=mk(T,cv);root.classList.add('ready3d');key='~';paint();if(vis)loop0()}
+        catch(e){failed=1;console.warn('[MAHASI] 3D শোকেস বাইক বানানো যায়নি',e&&e.message)}
+      }).catch(function(e){clearTimeout(t);failed=1;console.warn('[MAHASI] three.js লোড হয়নি, 2D বাইক দেখাচ্ছে',e&&e.message)});
+    }catch(e){failed=1}
+  }
+  function mk(T,canvas){
+    var W=canvas.width,H=canvas.height;
+    var rd=new T.WebGLRenderer({canvas:canvas,alpha:true,antialias:true});
+    rd.setPixelRatio(1);rd.setSize(W,H,false);rd.setClearColor(0x000000,0);
+    var sc=new T.Scene(),cam=new T.PerspectiveCamera(30,W/H,.1,80);
+    sc.add(new T.HemisphereLight(0xc9ddff,0x25202a,2.0));
+    var key=new T.DirectionalLight(0xffffff,3.2);key.position.set(-5,8,4);sc.add(key);
+    var rim=new T.DirectionalLight(0xffd7a0,2.2);rim.position.set(5,3,-4);sc.add(rim);
+    var fill=new T.DirectionalLight(0xffffff,1.1);fill.position.set(-6,2,-5);sc.add(fill);
+    var bike=new T.Group();sc.add(bike);
+    function MT(o){return new T.MeshStandardMaterial(o)}
+    var blue=MT({color:0x075dff,metalness:.55,roughness:.28}),darkBlue=MT({color:0x06234e,metalness:.5,roughness:.35}),
+        black=MT({color:0x10131a,metalness:.35,roughness:.48}),rubber=MT({color:0x090a0d,roughness:.92}),
+        tread=MT({color:0x23252d,roughness:.9}),metal=MT({color:0x9ba7b7,metalness:.82,roughness:.25}),
+        gold=MT({color:0xc58a25,metalness:.75,roughness:.25}),glass=MT({color:0x9bcfff,metalness:.2,roughness:.12,transparent:true,opacity:.48}),
+        tailMat=MT({color:0xff1c32,emissive:0x7b0010,emissiveIntensity:.9}),white=MT({color:0xeaf5ff,emissive:0x91caff,emissiveIntensity:1.1}),
+        jacR=MT({color:0xd0202f,roughness:.6,metalness:.1}),jacK=MT({color:0x14151a,roughness:.6,metalness:.1}),
+        pants=MT({color:0x15161b,roughness:.7}),helm=MT({color:0xb9bdc9,metalness:.6,roughness:.22}),stripe=MT({color:0xe3293b,roughness:.4});
+    function mesh(g,m,p,par){var o=new T.Mesh(g,m);o.position.set(p[0],p[1],p[2]);(par||bike).add(o);return o}
+    function rod(a,b,r,m,par){
+      var s=new T.Vector3(a[0],a[1],a[2]),e=new T.Vector3(b[0],b[1],b[2]),d=new T.Vector3().subVectors(e,s),len=d.length();
+      var o=mesh(new T.CylinderGeometry(r,r,len,12),m,[(a[0]+b[0])/2,(a[1]+b[1])/2,(a[2]+b[2])/2],par);
+      o.quaternion.setFromUnitVectors(new T.Vector3(0,1,0),d.normalize());return o;
+    }
+    /* চাকা — অক্ষ Z (বাইকের পাশ বরাবর), তাই পেছন থেকে সরু টায়ার দেখায় */
+    function wheel(x){
+      var g=new T.Group();g.position.set(x,.72,0);bike.add(g);
+      mesh(new T.TorusGeometry(.58,.145,16,64),rubber,[0,0,0],g);
+      mesh(new T.TorusGeometry(.405,.035,10,48),blue,[0,0,0],g);
+      mesh(new T.CylinderGeometry(.09,.09,.22,24),metal,[0,0,0],g).rotation.x=Math.PI/2;
+      mesh(new T.CylinderGeometry(.29,.29,.025,48),metal,[0,0,0],g).rotation.x=Math.PI/2;
+      var i,a;
+      for(i=0;i<10;i++){a=i*Math.PI/5;rod([Math.cos(a)*.12,Math.sin(a)*.12,0],[Math.cos(a)*.39,Math.sin(a)*.39,0],.012,metal,g)}
+      for(i=0;i<28;i++){a=i*Math.PI*2/28;mesh(new T.BoxGeometry(.06,.05,.27),tread,[Math.cos(a)*.725,Math.sin(a)*.725,0],g).rotation.z=a}
+      return g;
+    }
+    var wheels=[wheel(-1.55),wheel(1.55)];
+    /* ফ্রেম, সুইংআর্ম, ইঞ্জিন */
+    rod([-1.55,.72,0],[-.35,1.05,0],.075,metal);rod([1.55,.72,0],[.35,1.05,0],.07,metal);
+    rod([-.35,1.05,0],[.35,1.05,0],.065,black);rod([.35,1.05,0],[.95,1.7,0],.055,metal);rod([-.35,1.05,0],[-.95,1.65,0],.05,metal);
+    mesh(new T.BoxGeometry(.85,.62,.62),black,[.05,.98,0]);
+    mesh(new T.CylinderGeometry(.28,.28,.68,32),metal,[.05,.98,0]).rotation.x=Math.PI/2;
+    mesh(new T.BoxGeometry(.52,.16,.68),darkBlue,[.05,1.35,0]);
+    /* এক্সজস্ট */
+    rod([.1,.78,.38],[.95,.65,.38],.055,metal);
+    mesh(new T.CylinderGeometry(.11,.17,.72,24),black,[1.15,.65,.38]).rotation.z=-Math.PI/2.2;
+    /* ট্যাংক, সিট, টেইল */
+    var tank=mesh(new T.SphereGeometry(.56,32,20),blue,[0,1.82,0]);tank.scale.set(1.15,.66,.72);
+    mesh(new T.BoxGeometry(.48,.025,.012),white,[.02,2.16,.51]);
+    var seat=mesh(new T.BoxGeometry(.95,.18,.62),black,[-.9,1.82,0]);seat.rotation.z=-.08;
+    var tail=mesh(new T.ConeGeometry(.42,.85,4),blue,[-1.38,1.78,0]);tail.rotation.z=-Math.PI/2;tail.scale.set(.75,1,.8);
+    /* ফেয়ারিং, ফর্ক */
+    for(var s=-1;s<=1;s+=2){
+      var f1=mesh(new T.BoxGeometry(1.2,.55,.16),blue,[.62,1.45,s*.34]);f1.rotation.z=-.2;
+      var f2=mesh(new T.BoxGeometry(.8,.42,.14),black,[.25,1.13,s*.37]);f2.rotation.z=.22;
+      var f3=mesh(new T.ConeGeometry(.27,.8,3),darkBlue,[1,1.35,s*.28]);f3.rotation.z=-Math.PI/2;
+      rod([1.55,.72,s*.12],[.95,1.85,s*.12],.055,gold);rod([1.55,.72,s*.22],[.95,1.85,s*.22],.035,metal);
+    }
+    var cowl=mesh(new T.BoxGeometry(.52,.62,.72),blue,[1.12,2,0]);cowl.rotation.z=-.22;
+    var scr=mesh(new T.BoxGeometry(.06,.48,.54),glass,[1.22,2.42,0]);scr.rotation.z=-.25;
+    for(s=-1;s<=1;s+=2){
+      var lp=mesh(new T.BoxGeometry(.06,.16,.22),white,[1.4,1.92,s*.22]);lp.rotation.y=s*.15;
+      rod([.9,2.05,s*.35],[.72,2.48,s*.8],.025,black);mesh(new T.SphereGeometry(.08,16,12),black,[.72,2.48,s*.8]);
+      rod([.72,2.05,s*.48],[.62,2.62,s*.76],.025,black);
+      var mr=mesh(new T.BoxGeometry(.28,.1,.22),black,[.62,2.65,s*.76]);mr.rotation.z=s*.15;
+    }
+    rod([.72,2.05,-.55],[.72,2.05,.55],.035,black);
+    /* পেছনের বাতি + নাম্বার প্লেট */
+    mesh(new T.BoxGeometry(.16,.09,.34),tailMat,[-1.78,1.84,0]);
+    mesh(new T.BoxGeometry(.45,.06,.34),black,[-1.75,1.66,0]);
+    rod([-1.7,1.66,0],[-1.86,1.56,0],.02,black);
+    var pc=document.createElement('canvas');pc.width=128;pc.height=84;var px=pc.getContext('2d');
+    px.fillStyle='#f3f3ee';px.fillRect(0,0,128,84);px.strokeStyle='#14141a';px.lineWidth=4;px.strokeRect(3,3,122,78);
+    px.fillStyle='#16161a';px.font='800 44px sans-serif';px.textAlign='center';px.textBaseline='middle';px.fillText('ABC',64,44);
+    var pt=new T.CanvasTexture(pc);pt.colorSpace=T.SRGBColorSpace;
+    var plate=mesh(new T.PlaneGeometry(.4,.26),new T.MeshBasicMaterial({map:pt}),[-1.87,1.46,0]);plate.rotation.y=-Math.PI/2;
+    /* ফুট পেগ */
+    for(s=-1;s<=1;s+=2){rod([-.35,.82,s*.35],[-.35,.72,s*.62],.035,metal);rod([-.55,.72,s*.62],[-.15,.72,s*.62],.035,black)}
+    
+    var disc=new T.Mesh(new T.CylinderGeometry(2.9,2.9,.06,72),MT({color:0x11151c,metalness:.6,roughness:.4}));disc.position.y=-.03;sc.add(disc);
+    var ring=new T.Mesh(new T.TorusGeometry(2.9,.035,10,96),MT({color:0xd8b36a,emissive:0xd8b36a,emissiveIntensity:.8}));ring.rotation.x=Math.PI/2;ring.position.y=.01;sc.add(ring);
+    var ang=-2.2,last=0;
+    function tint(h){blue.color.set(h);darkBlue.color.set(h);darkBlue.color.multiplyScalar(.28)}
+    tint('#E53935');
+    return{
+      tint:tint,
+      render:function(t){
+        var dt=last?Math.min(.05,(t-last)/1000):0;last=t;
+        if(!still)ang+=dt*.45;
+        cam.position.set(Math.cos(ang)*11,3.6+Math.sin(t*.0008)*.15,Math.sin(ang)*11);
+        cam.lookAt(0,1.2,0);
+        rd.render(sc,cam);
+      }
+    };
+  }
+  function loop(t){raf=requestAnimationFrame(loop);if(R)R.render(t)}
+  function loop0(){if(R&&vis&&!raf)raf=requestAnimationFrame(loop)}
+  function ensure(){
+    var sec=document.getElementById('coming-soon');
+    if(!sec){if(root&&root.parentNode){root.parentNode.removeChild(root);cancelAnimationFrame(raf);raf=0}return}
+    if(!root)build();
+    if(root.previousSibling!==sec&&sec.parentNode)sec.parentNode.insertBefore(root,sec.nextSibling);
+    paint();
+  }
+  ensure();var pt=0;
+  new MutationObserver(function(){if(pt)return;pt=setTimeout(function(){pt=0;ensure()},250)}).observe(document.body,{childList:true,subtree:true});
+  setInterval(paint,1500);
+})();
+</script>
+
 <style id="mh-bike-signup-css">
 .shop-lift{cursor:pointer;transition:filter .2s}
 .shop-lift:hover{filter:drop-shadow(0 0 10px rgba(229,57,53,.85))}

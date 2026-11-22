@@ -6644,18 +6644,114 @@ html.cg-on #cg-pf.open{display:flex}
     try{var b=t.split('.')[1].replace(/-/g,'+').replace(/_/g,'/');while(b.length%4)b+='=';
       return JSON.parse(decodeURIComponent(Array.prototype.map.call(atob(b),function(c){return '%'+('00'+c.charCodeAt(0).toString(16)).slice(-2)}).join('')))}catch(e){return null}
   }
+  /* ---------- Supabase Auth (সার্ভারে অ্যাকাউন্ট — সব ডিভাইসে একই লগইন) ---------- */
+  var SBU='https://wfofgskhwuvaqmlnmvwe.supabase.co',SBK='sb_publishable_-j1csrsXlNbxouR0iFbOaA_iYN5ULXv';
+  /* মোবাইল নম্বরকে ভেতরে ইমেইল বানিয়ে (01XXXXXXXXX@এই-ডোমেইন) Supabase-এ রাখা হয়। কোনো মেইল পাঠানো হয় না। ডোমেইন বদলাতে চাইলে এখানে। */
+  var MD='mahasi-abc.app',SK='mahasi_sb_session',BK='mahasi_my_bikes';
+  function sbReq(path,opt,tok){
+    opt=opt||{};var h={apikey:SBK,'Content-Type':'application/json'};
+    if(tok)h.Authorization='Bearer '+tok;
+    return fetch(SBU+'/auth/v1/'+path,{method:opt.method||'GET',headers:h,body:opt.body?JSON.stringify(opt.body):undefined}).then(function(r){
+      return r.text().then(function(t){
+        var j=null;try{j=t?JSON.parse(t):null}catch(x){}
+        if(!r.ok){var er=new Error((j&&(j.msg||j.error_description||j.message))||('HTTP '+r.status));er.code=(j&&(j.error_code||j.error))||'';er.status=r.status;throw er}
+        return j;
+      });
+    });
+  }
+  function sGet(){return rd(SK,null)}
+  function sSet(s){
+    if(!s){try{localStorage.removeItem(SK)}catch(x){}return}
+    wr(SK,{access_token:s.access_token,refresh_token:s.refresh_token,expires_at:s.expires_at||(Math.floor(Date.now()/1000)+(s.expires_in||3600))});
+  }
+  function sFresh(){
+    var s=sGet();if(!s)return Promise.resolve(null);
+    if(s.expires_at>Math.floor(Date.now()/1000)+60)return Promise.resolve(s.access_token);
+    return sbReq('token?grant_type=refresh_token',{method:'POST',body:{refresh_token:s.refresh_token}}).then(function(r){sSet(r);return r.access_token}).catch(function(er){
+      if(er&&(er.status===400||er.status===401||er.status===403))sSet(null);
+      return null;
+    });
+  }
+  function pMail(ph){return ph+'@'+MD}
+  function meFromUser(u){
+    var m=u.user_metadata||{},em=u.email||'',sfx='@'+MD;
+    if(em.slice(-sfx.length)===sfx){var ph=em.slice(0,-sfx.length);return{name:m.name||ph,phone:ph}}
+    return{name:m.full_name||m.name||em,email:em,picture:m.avatar_url||m.picture||'',google:1};
+  }
+  function pushBike(bk){
+    return sFresh().then(function(t){if(!t)return;return sbReq('user',{method:'PUT',body:{data:{my_bike:bk}}},t)}).catch(function(){});
+  }
+  window.mhAuthSaveBike=pushBike;
+  /* সার্ভারের বাইক ↔ এই ডিভাইসের "আমার বাইক" মেলানো। লোকাল বদলালে true */
+  function pullBike(u,me){
+    var id=me.email||me.phone;if(!id)return false;
+    var sv=(u.user_metadata||{}).my_bike,db=rd(BK,{}),cur=db[id];
+    if(sv&&sv.model){
+      if(!cur||cur.model!==sv.model||cur.brand!==sv.brand||cur.id!==sv.id){db[id]=sv;wr(BK,db);return true}
+      return false;
+    }
+    if(cur&&cur.model)pushBike(cur);
+    return false;
+  }
+  function applySession(r){
+    sSet(r);var me=meFromUser(r.user);wr(ME,me);
+    return{me:me,bike:pullBike(r.user,me)};
+  }
+  function sbOut(){
+    var s=sGet();sSet(null);
+    if(s&&s.access_token)sbReq('logout',{method:'POST'},s.access_token).catch(function(){});
+  }
+  function errMsg(er){
+    var c=(er&&er.code)||'',m=String((er&&er.message)||'');
+    if(c==='noconfirm'){console.warn('[MAHASI auth] Supabase-এ "Confirm email" চালু আছে — Authentication → Sign In / Providers → Email-এ এটা বন্ধ করুন');return 'সাইন আপ এখন সম্পূর্ণ করা যাচ্ছে না। কিছুক্ষণ পরে আবার চেষ্টা করুন।'}
+    if(c==='user_already_exists'||/already (been )?registered|already exists/i.test(m))return 'এই নম্বর দিয়ে অ্যাকাউন্ট আগেই খোলা আছে — লগইন করুন';
+    if(c==='invalid_credentials'||/invalid login/i.test(m))return 'নম্বর বা পাসওয়ার্ড মিলছে না';
+    if(c==='weak_password')return 'পাসওয়ার্ড আরও শক্ত দিন (কমপক্ষে ৬ অক্ষর)';
+    if(c==='over_request_rate_limit'||c==='over_email_send_rate_limit'||(er&&er.status===429))return 'অনেকবার চেষ্টা হয়েছে, কিছুক্ষণ পরে আবার দিন';
+    if(!er||!er.status)return 'ইন্টারনেট সংযোগ নেই, আবার চেষ্টা করুন';
+    console.warn('[MAHASI auth]',c,m);
+    return 'কিছু একটা সমস্যা হয়েছে, আবার চেষ্টা করুন';
+  }
+  /* Google nonce (Supabase যাচাইয়ের জন্য) */
+  var rawNonce='',hNonce='';
+  function hex(buf){return Array.prototype.map.call(new Uint8Array(buf),function(x){return('0'+x.toString(16)).slice(-2)}).join('')}
+  function mkNonce(){
+    if(hNonce)return Promise.resolve();
+    try{
+      var a=new Uint8Array(16);crypto.getRandomValues(a);rawNonce=hex(a);
+      return crypto.subtle.digest('SHA-256',new TextEncoder().encode(rawNonce)).then(function(d){hNonce=hex(d)});
+    }catch(x){rawNonce='';hNonce='';return Promise.resolve()}
+  }
+  /* পেজ খুললে: সেশন থাকলে যাচাই করে প্রোফাইল ও বাইক নামিয়ে আনা; না থাকলে পুরোনো লোকাল-লগইন মুছে দেওয়া */
+  (function boot(){
+    if(!sGet()){try{localStorage.removeItem(ME)}catch(x){}return}
+    sFresh().then(function(t){if(!t)throw{status:401};return sbReq('user',{},t)}).then(function(u){
+      var me=meFromUser(u);wr(ME,me);
+      var ch=pullBike(u,me),done=false;
+      try{done=sessionStorage.getItem('mh_sb_rl')==='1'}catch(x){}
+      if(ch&&!done){try{sessionStorage.setItem('mh_sb_rl','1')}catch(x){}location.reload()}
+    }).catch(function(er){
+      if(er&&(er.status===401||er.status===403||er.status===404)){sSet(null);try{localStorage.removeItem(ME)}catch(x){}}
+    });
+  })();
   function onGoogle(r){
-    var p=r&&r.credential?jwt(r.credential):null,e=box.querySelector('#pf-ge');
-    if(!p||p.aud!==GID||!p.email||(p.exp&&p.exp*1000<Date.now()-60000)){if(e)e.textContent='Google লগইন সম্পন্ন করা যায়নি, আবার চেষ্টা করুন';return}
-    var me={name:p.name||p.email,email:p.email,picture:p.picture||'',google:1};
-    var db=rd(DB,{});db['g:'+p.sub]={name:me.name,email:me.email,at:Date.now()};wr(DB,db);
-    wr(ME,me);render();
+    var e=box.querySelector('#pf-ge');
+    if(!r||!r.credential){if(e)e.textContent='Google লগইন সম্পন্ন করা যায়নি, আবার চেষ্টা করুন';return}
+    if(e)e.textContent='';
+    var body={provider:'google',id_token:r.credential};if(rawNonce)body.nonce=rawNonce;
+    sbReq('token?grant_type=id_token',{method:'POST',body:body}).then(function(s){
+      var x=applySession(s);render();
+      if(x.bike)setTimeout(function(){location.reload()},900);
+    }).catch(function(er){
+      console.warn('[MAHASI auth] google',er&&er.code,er&&er.message);
+      var e2=box.querySelector('#pf-ge');if(e2)e2.textContent='Google লগইন সম্পন্ন করা যায়নি, আবার চেষ্টা করুন';
+    });
   }
   function mountG(){
     var host=box.querySelector('#pf-g'),e=box.querySelector('#pf-ge');if(!host)return;
-    loadG().then(function(){
+    loadG().then(mkNonce).then(function(){
       if(!box.contains(host))return;
-      google.accounts.id.initialize({client_id:GID,callback:onGoogle,auto_select:false,cancel_on_tap_outside:true});
+      google.accounts.id.initialize({client_id:GID,callback:onGoogle,auto_select:false,nonce:hNonce||undefined,cancel_on_tap_outside:true});
       google.accounts.id.renderButton(host,{type:'standard',theme:'filled_black',size:'large',shape:'pill',text:'continue_with',locale:'bn',width:300});
     }).catch(function(){
       if(e)e.textContent='Google এখন লোড হচ্ছে না (ইন্টারনেট বা অ্যাপের ভেতরের ব্রাউজার সমস্যা হতে পারে)। নিচে মোবাইল নম্বর দিয়ে সাইন আপ করুন।';
@@ -6675,28 +6771,33 @@ html.cg-on #cg-pf.open{display:flex}
       '<div class="pf-g" id="pf-g"></div><div class="pf-gerr" id="pf-ge" role="alert"></div><div class="pf-or"><span>অথবা</span></div>'+
       (mode==='up'?'<label><span>নাম</span><input id="pf-n" type="text" autocomplete="name" placeholder="আপনার নাম" maxlength="60"></label>':'')+
       '<label><span>মোবাইল নম্বর</span><input id="pf-p" type="tel" inputmode="numeric" autocomplete="tel" placeholder="01XXXXXXXXX" maxlength="14"></label>'+
-      '<label><span>পাসওয়ার্ড</span><input id="pf-w" type="password" autocomplete="new-password" placeholder="যেকোনো পাসওয়ার্ড" maxlength="64"></label>'+
+      '<label><span>পাসওয়ার্ড</span><input id="pf-w" type="password" autocomplete="'+(mode==='up'?'new-password':'current-password')+'" placeholder="কমপক্ষে ৬ অক্ষর" maxlength="64"></label>'+
       '<div class="pf-err" id="pf-e" role="alert"></div>'+
       '<button class="pf-btn" data-a="go" type="button">'+(mode==='up'?'অ্যাকাউন্ট খুলুন':'লগইন করুন')+'</button>';
     mountG();
   }
   function submit(){
-    var n=mode==='in'?'':box.querySelector('#pf-n').value.trim(),p=bn2en(box.querySelector('#pf-p').value).replace(/[\s\-]/g,''),w=box.querySelector('#pf-w').value,e=box.querySelector('#pf-e'),b=box.querySelector('[data-a=go]');
-    if(mode==='up'&&!n){e.textContent='নাম লিখুন';return}
-    p=p.replace(/^\+?88/,'');
-    if(!/^01[3-9]\d{8}$/.test(p)){e.textContent='সঠিক মোবাইল নম্বর দিন (১১ ডিজিট, যেমন 017XXXXXXXX)';return}
+    var md=mode,n=md==='in'?'':box.querySelector('#pf-n').value.trim(),ph=bn2en(box.querySelector('#pf-p').value).replace(/[\s\-]/g,''),w=box.querySelector('#pf-w').value,e=box.querySelector('#pf-e'),b=box.querySelector('[data-a=go]');
+    if(md==='up'&&!n){e.textContent='নাম লিখুন';return}
+    ph=ph.replace(/^\+?88/,'');
+    if(!/^01[3-9]\d{8}$/.test(ph)){e.textContent='সঠিক মোবাইল নম্বর দিন (১১ ডিজিট, যেমন 017XXXXXXXX)';return}
     if(!w){e.textContent='একটা পাসওয়ার্ড দিন';return}
-    if(mode==='in'){var u=rd(DB,{})[p];if(!u){e.textContent='এই নম্বরে অ্যাকাউন্ট নেই, আগে সাইন আপ করুন';return}
-      b.disabled=true;hash(w).then(function(h){if(h!==u.pw){e.textContent='পাসওয়ার্ড মিলছে না';b.disabled=false;return}
-        wr(ME,{name:u.name,phone:p});box.innerHTML='<button class="pf-x" data-a="x" aria-label="বন্ধ করুন">×</button><div class="pf-ok"><i>✓</i><b>স্বাগতম, '+esc(u.name)+'</b></div><button class="pf-btn" data-a="x" type="button">ঠিক আছে</button>'});return}
-    var db=rd(DB,{});
-    if(db[p]){e.textContent='এই নম্বর দিয়ে অ্যাকাউন্ট আগেই খোলা আছে';return}
-    b.disabled=true;
-    hash(w).then(function(h){
-      db[p]={name:n,phone:p,pw:h,at:Date.now()};
-      if(!wr(DB,db)){e.textContent='অ্যাকাউন্ট সেভ করা যায়নি, আবার চেষ্টা করুন';b.disabled=false;return}
-      wr(ME,{name:n,phone:p});
-      box.innerHTML='<button class="pf-x" data-a="x" aria-label="বন্ধ করুন">×</button><div class="pf-ok"><i>✓</i><b>সাইন আপ সম্পন্ন!</b><p>'+esc(n)+', আপনার অ্যাকাউন্ট খোলা হয়েছে।</p></div><button class="pf-btn" data-a="x" type="button">ঠিক আছে</button>';
+    if(w.length<6){e.textContent='পাসওয়ার্ড কমপক্ষে ৬ অক্ষরের দিন';return}
+    e.textContent='';b.disabled=true;
+    var req=md==='in'
+      ?sbReq('token?grant_type=password',{method:'POST',body:{email:pMail(ph),password:w}})
+      :sbReq('signup',{method:'POST',body:{email:pMail(ph),password:w,data:{name:n,phone:ph}}}).then(function(r){
+        if(!r||!r.access_token){var x=new Error('confirm');x.code='noconfirm';throw x}
+        return r;
+      });
+    req.then(function(r){
+      var x=applySession(r),nm=esc(x.me.name||'');
+      box.innerHTML='<button class="pf-x" data-a="x" aria-label="বন্ধ করুন">×</button><div class="pf-ok"><i>✓</i><b>'+(md==='up'?'সাইন আপ সম্পন্ন!':'স্বাগতম, '+nm)+'</b>'+(md==='up'?'<p>'+nm+', আপনার অ্যাকাউন্ট খোলা হয়েছে।</p>':'')+'</div><button class="pf-btn" data-a="x" type="button">ঠিক আছে</button>';
+      if(x.bike)setTimeout(function(){location.reload()},900);
+    }).catch(function(er){
+      var e2=box.querySelector('#pf-e'),b2=box.querySelector('[data-a=go]');
+      if(e2)e2.textContent=errMsg(er);
+      if(b2)b2.disabled=false;
     });
   }
   av.setAttribute('role','button');av.setAttribute('tabindex','0');av.setAttribute('aria-label','প্রোফাইল');
@@ -6707,7 +6808,7 @@ html.cg-on #cg-pf.open{display:flex}
     var a=ev.target.closest&&ev.target.closest('[data-a]');if(!a)return;
     var k=a.getAttribute('data-a');
     if(k==='x')close();else if(k==='go')submit();else if(k==='tu'||k==='ti'){mode=k==='tu'?'up':'in';render()}
-    else if(k==='out'){try{localStorage.removeItem(ME)}catch(e){}try{if(window.google&&google.accounts&&google.accounts.id)google.accounts.id.disableAutoSelect()}catch(e){}render()}
+    else if(k==='out'){sbOut();try{localStorage.removeItem(ME)}catch(e){}try{if(window.google&&google.accounts&&google.accounts.id)google.accounts.id.disableAutoSelect()}catch(e){}render()}
   });
   ov.addEventListener('keydown',function(ev){
     if(ev.key==='Escape')close();
@@ -8280,7 +8381,7 @@ html:not(.cg-on) #cg-pf.open{display:flex}
     var m=me();if(!m)return;var d=rd(DB,{});d[uid(m)]=b;wr(DB,d);
     bp.classList.remove('open');paint();
     bx.innerHTML='';card.innerHTML='<b>✓ বাইক সেভ হয়েছে</b>পুরো সাইট আপনার '+esc(label(b))+' অনুযায়ী সাজানো হচ্ছে…';card.classList.add('open');
-    setTimeout(function(){location.reload()},900);
+    var sp=window.mhAuthSaveBike?window.mhAuthSaveBike(b):null;Promise.race([Promise.resolve(sp),new Promise(function(r){setTimeout(r,3000)})]).then(function(){setTimeout(function(){location.reload()},600)});
   }
   var EX=[{n:'Runner',m:['Turbo 125','Bullet 100','Knight Rider 100','Royal 100']},{n:'KTM',m:['Duke 125','Duke 200','Duke 250','Duke 390','RC 200']},{n:'Benelli',m:['TNT 15','165S','302S']}];
   function norm(x){return String(x).toLowerCase().replace(/[^a-z0-9]/g,'')}
@@ -8334,6 +8435,39 @@ html:not(.cg-on) #cg-pf.open{display:flex}
     else if(a==='c'){card.classList.remove('open');picker()}
   });
   paint();setTimeout(show,1800);
+})();
+</script>
+<style id="mh-bike-signup-css">
+.shop-lift{cursor:pointer;transition:filter .2s}
+.shop-lift:hover{filter:drop-shadow(0 0 10px rgba(229,57,53,.85))}
+.shop-lift:focus-visible{outline:2px solid #D8B36A;outline-offset:6px}
+</style>
+<script id="mh-bike-signup-js">
+/* গ্যারেজ দৃশ্যের লাল বাইকে ক্লিক করলে Google সাইন আপ/লগইন পপআপ খুলবে (নতুন ফিচার, বাকি কোডে হাত দেওয়া হয়নি) */
+(function(){
+  function openSignup(){
+    var av=document.querySelector('#cg-screen .rk-av');
+    if(av)av.click();
+  }
+  function prep(){
+    var g=document.querySelector('.shop-lift');
+    if(!g||g.__su)return;g.__su=1;
+    g.setAttribute('role','button');
+    g.setAttribute('tabindex','0');
+    g.setAttribute('aria-label','Google দিয়ে সাইন আপ করুন');
+  }
+  document.addEventListener('click',function(e){
+    var t=e.target&&e.target.closest&&e.target.closest('.shop-lift');
+    if(t){e.preventDefault();openSignup()}
+  });
+  document.addEventListener('keydown',function(e){
+    if((e.key==='Enter'||e.key===' ')&&e.target&&e.target.classList&&e.target.classList.contains('shop-lift')){
+      e.preventDefault();openSignup();
+    }
+  });
+  prep();
+  var pt=0;
+  new MutationObserver(function(){if(pt)return;pt=setTimeout(function(){pt=0;prep()},250)}).observe(document.body,{childList:true,subtree:true});
 })();
 </script>
 </body>

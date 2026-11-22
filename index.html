@@ -8433,8 +8433,8 @@ html:not(.cg-on) #cg-pf.open{display:flex}
   function go(a){
     card.classList.remove('open');
     if(a==='s'){var bt=document.querySelector('#home button');if(bt)bt.click()}
-    else if(a==='w'){var w=document.getElementById('bikewash');if(w)w.scrollIntoView({behavior:'smooth',block:'start'})}
-    else if(a==='k'){var el=document.getElementById('stickers')||document.getElementById('store');if(el)el.scrollIntoView({behavior:'smooth',block:'start'})}
+    else if(a==='w'){if(!(window.mhPage&&window.mhPage('w'))){var w=document.getElementById('bikewash');if(w)w.scrollIntoView({behavior:'auto',block:'start'})}}
+    else if(a==='k'){if(!(window.mhPage&&window.mhPage('k'))){var el=document.getElementById('stickers')||document.getElementById('store');if(el)el.scrollIntoView({behavior:'auto',block:'start'})}}
     else if(a==='c')picker();
   }
   window.mhGo=go;
@@ -8461,7 +8461,7 @@ html:not(.cg-on) #cg-pf.open{display:flex}
 .sb-head p{margin:0;color:#9CA3AF;font-size:14px}
 .sb-grid{display:grid;grid-template-columns:1fr minmax(320px,640px) 1fr;gap:18px;align-items:center;margin-top:16px}
 .sb-col{display:grid;gap:12px}
-.sb-c{display:flex;align-items:center;gap:12px;text-align:left;padding:12px 14px;border-radius:14px;border:1px solid rgba(255,255,255,.09);background:linear-gradient(160deg,rgba(20,24,31,.95),rgba(14,17,22,.95));color:#F4F4F2;font:inherit;animation:sbIn .7s both;animation-delay:var(--d,0s)}
+.sb-c{display:flex;align-items:center;gap:12px;text-align:left;padding:12px 14px;border-radius:14px;border:1px solid rgba(255,255,255,.09);background:linear-gradient(160deg,rgba(20,24,31,.95),rgba(14,17,22,.95));color:#F4F4F2;font:inherit;animation:sbIn .7s backwards;animation-delay:var(--d,0s)}
 .sb-c i{font-style:normal;display:grid;place-items:center;flex:none;width:40px;height:40px;border-radius:12px;background:rgba(216,179,106,.12);font-size:20px}
 .sb-c b{display:block;font-size:14px;color:#fff}
 .sb-c span{display:block;margin-top:2px;font-size:12px;line-height:1.45;color:#9CA3AF}
@@ -8494,6 +8494,55 @@ html:not(.cg-on) #cg-pf.open{display:flex}
 @media (max-width:900px){.sb-grid{grid-template-columns:1fr}.sb-stage{order:-1}.sb-col{grid-template-columns:1fr 1fr}.sb-col.l .sb-c{flex-direction:row;text-align:left}}
 @media (max-width:520px){.sb-col{grid-template-columns:1fr}.sb-wrap{padding:0 14px}}
 @media (prefers-reduced-motion:reduce){#mh-sb *{animation:none!important}}
+</style>
+
+<style id="mh-sb-premium-css">
+/* ===== প্রিমিয়াম অ্যাকশন কার্ড (৬টা বাটন) ===== */
+#mh-sb .sb-col{gap:14px}
+#mh-sb .sb-c{position:relative;isolation:isolate;overflow:hidden;width:100%;gap:14px;padding:14px 16px;border-radius:18px;border:1px solid transparent;-webkit-tap-highlight-color:transparent;
+  background:linear-gradient(155deg,rgba(27,32,41,.97),rgba(12,15,20,.98)) padding-box,
+             linear-gradient(135deg,rgba(216,179,106,.6),rgba(255,255,255,.07) 38%,rgba(255,255,255,.04) 62%,rgba(229,57,53,.55)) border-box;
+  box-shadow:0 14px 34px -16px rgba(0,0,0,.9),inset 0 1px 0 rgba(255,255,255,.07);
+  transition:transform .25s cubic-bezier(.2,.7,.2,1),box-shadow .3s,filter .3s}
+#mh-sb .sb-c::before{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;background:linear-gradient(110deg,transparent 32%,rgba(216,179,106,.18) 50%,transparent 68%);transform:translateX(-130%);transition:transform .8s cubic-bezier(.2,.7,.2,1)}
+#mh-sb .sb-c>div{flex:1;min-width:0}
+#mh-sb .sb-c i{width:48px;height:48px;border-radius:15px;font-size:22px;border:1px solid rgba(216,179,106,.38);
+  background:radial-gradient(circle at 30% 22%,rgba(255,226,160,.32),rgba(216,179,106,.07) 62%),#141922;
+  box-shadow:inset 0 0 14px rgba(216,179,106,.14),0 8px 18px -8px rgba(216,179,106,.45);transition:transform .3s cubic-bezier(.2,.7,.2,1),box-shadow .3s}
+#mh-sb .sb-c b{font-size:15px;font-weight:700;letter-spacing:.01em;color:#fff}
+#mh-sb .sb-c span{font-size:12.5px;color:#A7AEBA}
+#mh-sb .sb-c:not(.act){cursor:default;filter:saturate(.9)}
+#mh-sb .sb-c.act{cursor:pointer}
+#mh-sb .sb-c.act::after{content:"›";flex:none;display:grid;place-items:center;width:32px;height:32px;padding-bottom:3px;border-radius:50%;font-size:22px;line-height:1;color:#D8B36A;
+  border:1px solid rgba(216,179,106,.42);background:rgba(216,179,106,.08);transition:transform .25s,background .25s,color .25s,border-color .25s}
+#mh-sb .sb-col.l .sb-c.act::after{content:"‹"}
+#mh-sb .sb-c.act:hover,#mh-sb .sb-c.act:focus-visible{transform:translateY(-3px);border-color:transparent;
+  box-shadow:0 20px 42px -14px rgba(229,57,53,.5),0 0 0 1px rgba(216,179,106,.4),inset 0 1px 0 rgba(255,255,255,.09)}
+#mh-sb .sb-c.act:hover::before,#mh-sb .sb-c.act:focus-visible::before{transform:translateX(130%)}
+#mh-sb .sb-c.act:hover i,#mh-sb .sb-c.act:focus-visible i{transform:scale(1.09) rotate(-5deg);box-shadow:inset 0 0 16px rgba(216,179,106,.22),0 10px 22px -8px rgba(229,57,53,.6)}
+#mh-sb .sb-c.act:hover::after,#mh-sb .sb-c.act:focus-visible::after{background:#E53935;border-color:#E53935;color:#fff;transform:translateX(3px)}
+#mh-sb .sb-col.l .sb-c.act:hover::after,#mh-sb .sb-col.l .sb-c.act:focus-visible::after{transform:translateX(-3px)}
+#mh-sb .sb-c.act:active{transform:scale(.975);transition-duration:.08s}
+#mh-sb .sb-c.act:focus-visible{outline:2px solid #D8B36A;outline-offset:3px}
+
+/* ===== পেজ মোড: ক্লিক করলে সরাসরি সেই সেকশন, নিচে স্ক্রল ছাড়া ===== */
+[data-mh-hide]{display:none!important}
+html.mh-pg .mh-dock{display:none!important}
+[data-mh-page]{animation:mhPgIn .4s cubic-bezier(.2,.7,.2,1) both}
+@keyframes mhPgIn{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+#mh-pgbar{position:sticky;top:0;z-index:39;display:flex;align-items:center;gap:12px;padding:10px 16px;font-family:"Hind Siliguri","Noto Sans Bengali",system-ui,sans-serif;
+  background:linear-gradient(180deg,rgba(22,26,34,.96),rgba(11,13,16,.96));-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);
+  border-bottom:1px solid rgba(216,179,106,.3);box-shadow:0 14px 30px -16px rgba(0,0,0,.9)}
+@media (min-width:768px){#mh-pgbar{top:64px;padding:12px 28px}}
+#mh-pgbar .bk{flex:none;display:inline-flex;align-items:center;gap:8px;padding:9px 16px 9px 12px;border-radius:999px;border:1px solid rgba(216,179,106,.55);cursor:pointer;
+  background:linear-gradient(180deg,rgba(216,179,106,.18),rgba(216,179,106,.06));color:#F3D9A0;font-size:13.5px;font-weight:700;line-height:1;font-family:inherit;transition:transform .2s,background .2s,color .2s,border-color .2s,box-shadow .2s}
+#mh-pgbar .bk:hover{background:#E53935;border-color:#E53935;color:#fff;transform:translateX(-2px);box-shadow:0 10px 24px -10px rgba(229,57,53,.7)}
+#mh-pgbar .bk:active{transform:scale(.97)}
+#mh-pgbar .bk:focus-visible{outline:2px solid #D8B36A;outline-offset:3px}
+#mh-pgbar .bk svg{width:16px;height:16px}
+#mh-pgbar .tt{flex:1;min-width:0;text-align:center;font-size:16px;font-weight:700;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#mh-pgbar .ch{flex:none;max-width:34vw;padding:7px 12px;border-radius:999px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.04);color:#C9CFD8;font-size:12.5px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+@media (max-width:560px){#mh-pgbar .ch{display:none}#mh-pgbar .tt{text-align:right}}
 </style>
 
 <script id="mh-sb-js">
@@ -8539,7 +8588,7 @@ html:not(.cg-on) #cg-pf.open{display:flex}
       h3.innerHTML='আপনার বাইক: <em>'+esc(nm)+'</em>';
       p.textContent='বাইকটা এখানেই থাকবে — নিচের অপশন থেকে সরাসরি সার্ভিস, ওয়াশ বা স্টিকারে যান। বাইক বদলাতে বাইকে ক্লিক করুন।';
       tap.textContent='আপনার বাইক সেভ আছে';badge.hidden=false;badge.textContent=nm;
-      colL.innerHTML=card('🏍️',esc(nm),esc(f.bn)+(f.cat?' · '+esc(f.cat):''),.05)+(f.d?card('🏷️','ব্র্যান্ড',esc(f.d),.15):'')+card('🔄','বাইক বদলাতে চান?','বাইকটাতে ক্লিক করুন',.25);
+      colL.innerHTML=card('🏍️',esc(nm),esc(f.bn)+(f.cat?' · '+esc(f.cat):''),.05)+(f.d?card('🏷️','ব্র্যান্ড',esc(f.d),.15):'')+card('🔄','বাইক বদলাতে চান?','বাইকটাতে ক্লিক করুন',.25,'c');
       colR.innerHTML=card('🔧','সার্ভিস করান','জেনারেল সার্ভিসিং ও টিউনিং বুক করুন',.1,'s')+card('🚿','ওয়াশ করান','সাধারণ, ফোম বা ফুল ডিটেইলিং ওয়াশ',.2,'w')+card('🎨','স্টিকার করান','আপনার বাইকের মাপে স্টিকার ডিজাইন',.3,'k');
       if(R)R.tint(f.c);setFb(f.c);
     }else{
@@ -8706,6 +8755,72 @@ html:not(.cg-on) #cg-pf.open{display:flex}
   prep();
   var pt=0;
   new MutationObserver(function(){if(pt)return;pt=setTimeout(function(){pt=0;prep()},250)}).observe(document.body,{childList:true,subtree:true});
+})();
+</script>
+
+<script id="mh-page-js">
+/* গ্যারেজের কার্ড থেকে ওয়াশ/স্টিকার — স্ক্রল না করে সরাসরি আলাদা পেজের মতো খোলে */
+(function(){
+  'use strict';
+  var MAP={w:{id:'bikewash',t:'🚿 বাইক ওয়াশ'},k:{id:'stickers',t:'🎨 স্টিকার স্টুডিও'}};
+  var root=document.documentElement,bar=null,cur=null,saveY=0,pushed=false,prevSR=null;
+  function jump(y){
+    var p=root.style.scrollBehavior;root.style.scrollBehavior='auto';
+    try{window.scrollTo({top:y,left:0,behavior:'instant'})}catch(e){window.scrollTo(0,y)}
+    requestAnimationFrame(function(){root.style.scrollBehavior=p});
+  }
+  function bikeLabel(){try{var b=window.mhMine&&window.mhMine();return b?((b.brand?b.brand+' ':'')+b.model):''}catch(e){return ''}}
+  function mkBar(title){
+    var d=document.createElement('div');d.id='mh-pgbar';
+    d.innerHTML='<button type="button" class="bk" aria-label="গ্যারেজে ফিরে যান"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg>গ্যারেজে ফিরুন</button><div class="tt"></div><div class="ch"></div>';
+    d.querySelector('.tt').textContent=title;
+    var c=d.querySelector('.ch'),l=bikeLabel();if(l)c.textContent='🏍️ '+l;else c.style.display='none';
+    d.querySelector('.bk').addEventListener('click',function(){close(false)});
+    return d;
+  }
+  function open(a){
+    var m=MAP[a];if(!m)return false;
+    var el=document.getElementById(m.id);if(!el)return false;
+    var main=document.querySelector('main')||document.getElementById('root');
+    if(!main||!main.contains(el))return false;
+    if(cur)close(true,true);
+    saveY=window.pageYOffset||0;
+    try{prevSR=history.scrollRestoration;history.scrollRestoration='manual'}catch(e){}
+    /* টার্গেট সেকশন বাদে বাকি সব ভাই-বোন লুকানো (React-এর DOM-এ হাত না দিয়ে, শুধু attribute) */
+    var n=el;
+    while(n&&n!==main){
+      var p=n.parentNode;if(!p)break;
+      Array.prototype.forEach.call(p.children,function(c){if(c!==n)c.setAttribute('data-mh-hide','1')});
+      n=p;
+    }
+    el.setAttribute('data-mh-page','1');
+    bar=mkBar(m.t);el.parentNode.insertBefore(bar,el);
+    root.classList.add('mh-pg');cur=a;
+    jump(0);
+    try{history.pushState({mhpg:a},'',location.href);pushed=true}catch(e){pushed=false}
+    return true;
+  }
+  function close(noRestore,fromOpen){
+    if(!cur)return;
+    var main=document.querySelector('main')||document.getElementById('root');
+    Array.prototype.forEach.call(document.querySelectorAll('[data-mh-hide]'),function(x){x.removeAttribute('data-mh-hide')});
+    Array.prototype.forEach.call(document.querySelectorAll('[data-mh-page]'),function(x){x.removeAttribute('data-mh-page')});
+    if(bar&&bar.parentNode)bar.parentNode.removeChild(bar);bar=null;
+    root.classList.remove('mh-pg');cur=null;
+    if(pushed&&!fromOpen){pushed=false;try{if(history.state&&history.state.mhpg)history.back()}catch(e){}}
+    else pushed=false;
+    if(!noRestore)jump(saveY);
+    setTimeout(function(){try{if(prevSR)history.scrollRestoration=prevSR}catch(e){}},400);
+  }
+  window.mhPage=open;window.mhPageClose=close;
+  window.addEventListener('popstate',function(){if(cur){pushed=false;close(false)}});
+  document.addEventListener('keydown',function(e){if(e.key==='Escape'&&cur)close(false)});
+  /* হেডার/নেভ লিংকে ক্লিক করলে আগে পেজ মোড বন্ধ, তারপর সাইটের নিজের নেভিগেশন চলবে */
+  document.addEventListener('click',function(e){
+    if(!cur)return;
+    var a=e.target.closest&&e.target.closest('header a,a[href^="#"]');
+    if(a&&!(bar&&bar.contains(a)))close(true);
+  },true);
 })();
 </script>
 </body>
